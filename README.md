@@ -19,7 +19,7 @@ The data is saved in standard `.csv` format. Each row represents a specific freq
 
 ### Data Columns Breakdown
 * **Inputs (Geometric & Material Parameters):**
-  * `l`: Resonator length indicator / T-feed line length `lq`
+  * `1`: T-feed line length lq(**Note: `lq` was kept as a fixed value of 11.185 mm during dataset construction**).
   * `w`: Microstrip resonator width (fixed at 2.0 mm)
   * `sub_t`: Substrate thickness (1.0 mm)
   * `h`: Dielectric constant / height characteristics
@@ -36,19 +36,15 @@ Below is a preview of the structured CSV data:
 
 ![Dataset Preview](dataset_preview.png)
 
-## 🚀 Quick Start (Python Example)
+## 🛠️ How to Generate the Dataset (Automated Script Guide)
 
-You can easily load this dataset using `pandas` for your surrogate models (Forward or Inverse neural networks):
+We provide the core python automation script (`generate_data.py`) used to produce this dataset via Ansys HFSS. It leverages PyAEDT and Python's `multiprocessing` to implement a high-throughput simulation pipeline.
 
-```python
-import pandas as pd
+### Pipeline Features:
+1. **Zombile Process Cleanup**: Automatically scans and terminates residual non-graphical `ansysedt` sessions before launching to prevent license or port conflicts.
+2. **Project Duplication**: Automatically duplicates independent `.aedt` project copies for each worker process to eliminate file read/write deadlock.
+3. **Memory Management**: Periodically restarts the HFSS desktop session (every 150 iterations) to purge background memory accumulation during large-scale batches.
 
-# Load the dataset
-train_df = pd.read_csv('train.csv')
-test_df = pd.read_csv('test.csv')
-
-# Example: Extract geometric features and S-parameters in dB
-features = train_df[['l1', 'l2', 'l3', 'g1', 'g2']]
-responses = train_df[['Freq', 'S11_dB', 'S21_dB']]
-
-print(f"Training features shape: {features.shape}")
+### Prerequisites
+Make sure your environment has Ansys EM (v2024 R1 or later) installed on Linux/Windows, and install the required library:
+```bash
